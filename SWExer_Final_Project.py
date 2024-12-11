@@ -9,12 +9,16 @@ import re
 # 데이터 로드 함수 (캐싱 적용)
 @st.cache_data
 def load_data():
-    subway_data = pd.read_csv(r"C:\Users\PC\Desktop\최예준 폴더\4학년 1학기\소프트웨어 실습\subway.csv")
-    subway_location_data = pd.read_csv(r"C:\Users\PC\Desktop\최예준 폴더\4학년 1학기\소프트웨어 실습\subwaylocation.csv")
-    real_estate_data = pd.read_csv(
-        r"C:\Users\PC\Desktop\최예준 폴더\4학년 1학기\소프트웨어 실습\서울시 부동산 전월세가 정보.csv",
-        encoding="utf-8-sig"
-    )
+    # GitHub 파일 URL
+    subway_url = "https://github.com/zzunni/SWExer_Final_Project/blob/main/subway.csv"
+    subway_location_url = "https://github.com/zzunni/SWExer_Final_Project/blob/main/subwayLocation.csv"
+    real_estate_url = "https://github.com/zzunni/SWExer_Final_Project/blob/main/%EC%84%9C%EC%9A%B8%EC%8B%9C%20%EB%B6%80%EB%8F%99%EC%82%B0%20%EC%A0%84%EC%9B%94%EC%84%B8%EA%B0%80%20%EC%A0%95%EB%B3%B4.csv"
+
+    # CSV 파일 읽기
+    subway_data = pd.read_csv(subway_url)
+    subway_location_data = pd.read_csv(subway_location_url)
+    real_estate_data = pd.read_csv(real_estate_url)
+    
     # 원하는 열만 선택
     selected_columns = [
         "법정동명", "전월세 구분", 
