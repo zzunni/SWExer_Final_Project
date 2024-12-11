@@ -12,22 +12,13 @@ def load_data():
     # GitHub 파일 URL
     subway_url = "https://raw.githubusercontent.com/zzunni/SWExer_Final_Project/main/subway.csv"
     subway_location_url = "https://raw.githubusercontent.com/zzunni/SWExer_Final_Project/main/subwayLocation.csv"
-    real_estate_url = "https://raw.githubusercontent.com/zzunni/SWExer_Final_Project/main/real_estate.csv"
 
     # CSV 파일 읽기
     subway_data = pd.read_csv(subway_url)
     subway_location_data = pd.read_csv(subway_location_url)
-    real_estate_data = pd.read_csv(real_estate_url, encoding='utf-8-sig')
     
-    # 원하는 열만 선택
-    selected_columns = [
-        "법정동명", "전월세 구분", 
-        "보증금(만원)", "임대료(만원)", "임대면적(㎡)", 
-        "건물명", "건축년도", "위도", "경도"
-    ]
-    real_estate_data = real_estate_data[selected_columns]
-    return subway_data, subway_location_data, real_estate_data
-  
+    return subway_data, subway_location_data
+
 # 다익스트라 알고리즘 함수
 def dijkstra(subway_data, start_station, end_station):
     # 지하철역 데이터를 이용해 그래프를 생성
@@ -71,7 +62,7 @@ def dijkstra(subway_data, start_station, end_station):
 # 출발역과 도착역 이름에서 괄호와 숫자 부분만 제거
 def remove_parentheses(station_name):
     return re.sub(r'\(.*\)', '', station_name).strip()
-  
+
 # 지도 생성 함수
 def create_map(filtered_properties, subway_location_data, start_station, end_station):
     # NaN이 포함된 위치 제거
@@ -94,12 +85,11 @@ def create_map(filtered_properties, subway_location_data, start_station, end_sta
     # 출발역과 도착역 데이터를 가져오는 부분 수정
     start_station_cleaned = remove_parentheses(start_station)
     end_station_cleaned = remove_parentheses(end_station)
-    
-      # 출발역과 도착역을 구별할 수 있도록 마커 추가
+
+    # 출발역 마커 (빨간색, 크고 눈에 띄게)
     start_station_data = subway_location_data[subway_location_data['출발역'] == start_station_cleaned].iloc[0]
     end_station_data = subway_location_data[subway_location_data['출발역'] == end_station_cleaned].iloc[0]
-    
-    # 출발역 마커 (빨간색, 크고 눈에 띄게)
+
     folium.Marker(
         location=[start_station_data['위도'], start_station_data['경도']],
         popup=f"출발역: {start_station}",
@@ -112,7 +102,7 @@ def create_map(filtered_properties, subway_location_data, start_station, end_sta
         popup=f"도착역: {end_station}",
         icon=folium.Icon(color="darkred", icon="circle", prefix="fa", icon_size=(30, 30))
     ).add_to(m)
-    
+
     # 부동산 매물 마커 추가
     for _, row in filtered_properties.iterrows():
         # 팝업 내용을 HTML로 구성
@@ -171,72 +161,80 @@ def main():
     st.sidebar.header("검색 조건")
     
     # 데이터 로드
-    subway_data, subway_location_data, real_estate_data = load_data()
-    
-    # 사용자 입력
-    district = st.sidebar.text_input("법정동명을 입력하세요:", "강남구")
-    deal_type = st.sidebar.selectbox("부동산 유형", ["전세", "월세"])
-    
-    
-    # 예산 입력
-    max_budget = None
-    deposit = None
-    rent = None
+    subway_data, subway_location_data = load_data()
 
-    if deal_type == "전세":
-        max_budget = st.sidebar.number_input("최대 보증금 (만원)", min_value=0, value=10000)
-    elif deal_type == "월세":
-        deposit = st.sidebar.number_input("최대 보증금 (만원)", min_value=0, value=10000)
-        rent = st.sidebar.number_input("최대 월세 (만원)", min_value=0, value=1000)
-    
-    # 건물 연식
-    max_age = st.sidebar.slider("건물 연식 (최대 연도)", min_value=0, max_value=100, value=30)
-    
-    # 면적 필터
-    min_area = st.sidebar.number_input("최소 면적 (㎡)", min_value=0, value=20)
-    max_area = st.sidebar.number_input("최대 면적 (㎡)", min_value=0, value=100)
-    
-    # 출발역과 도착역 입력
-    start_station = st.text_input("출발역을 입력하세요:")
-    end_station = st.text_input("도착역을 입력하세요:")
+    # real_estate.csv 업로드 받기
+    uploaded_file = st.sidebar.file_uploader("부동산 데이터 CSV 파일을 업로드하세요", type=["csv"])
 
-    # 최단 경로 예상 소요시간 출력
-    if start_station and end_station:
-        shortest_time = dijkstra(subway_data, start_station, end_station)
-        st.write(f"최단 시간: {shortest_time} 분")
+    if uploaded_file is not None:
+        real_estate_data = pd.read_csv(uploaded_file)
 
-    # 검색 버튼 추가
-    if st.sidebar.button("검색"):
-        # 부동산 매물 필터링
-        filtered_properties = filter_properties(
-            real_estate_data=real_estate_data,
-            deal_type=deal_type,
-            max_budget=max_budget,
-            max_age=max_age,
-            min_area=min_area,
-            max_area=max_area,
-            deposit=deposit,
-            rent=rent,
-            district=district
-        )
-        # 검색 결과 저장
-        st.session_state['filtered_properties'] = filtered_properties
+        # 원하는 열만 선택
+        selected_columns = [
+            "법정동명", "전월세 구분", 
+            "보증금(만원)", "임대료(만원)", "임대면적(㎡)", 
+            "건물명", "건축년도", "위도", "경도"
+        ]
+        real_estate_data = real_estate_data[selected_columns]
 
-    # 검색 결과 표시
-    if 'filtered_properties' in st.session_state:
-        filtered_properties = st.session_state['filtered_properties']
+        # 사용자 입력
+        district = st.sidebar.text_input("법정동명을 입력하세요:", "강남구")
+        deal_type = st.sidebar.selectbox("부동산 유형", ["전세", "월세"])
 
-        # 지도 생성
-        st.subheader("지하철 및 부동산 위치 지도")
-        st.write(f"현재 법정동: {district} / 부동산 유형: {deal_type}")
-        property_map = create_map(filtered_properties, subway_location_data, start_station, end_station)
-        st_folium(property_map, width=700, height=500)
+        # 예산 입력
+        max_budget = None
+        deposit = None
+        rent = None
 
-        # 필터링된 부동산 매물 출력
-        st.subheader("검색된 부동산 매물")
-        st.write(f"검색된 매물 수: {len(filtered_properties)}개")
-        st.write(filtered_properties)
+        if deal_type == "전세":
+            max_budget = st.sidebar.number_input("최대 보증금 (만원)", min_value=0, value=10000)
+        elif deal_type == "월세":
+            deposit = st.sidebar.number_input("최대 보증금 (만원)", min_value=0, value=10000)
+            rent = st.sidebar.number_input("최대 월세 (만원)", min_value=0, value=1000)
 
-# 실행
+        # 건물 연식
+        max_age = st.sidebar.slider("건물 연식 (최대 연도)", min_value=0, max_value=100, value=30)
+
+        # 면적 필터
+        min_area = st.sidebar.number_input("최소 면적 (㎡)", min_value=0, value=20)
+        max_area = st.sidebar.number_input("최대 면적 (㎡)", min_value=0, value=100)
+
+        # 출발역과 도착역 입력
+        start_station = st.text_input("출발역을 입력하세요:")
+        end_station = st.text_input("도착역을 입력하세요:")
+
+        # 최단 경로 예상 소요시간 출력
+        if start_station and end_station:
+            shortest_time = dijkstra(subway_data, start_station, end_station)
+            st.write(f"최단 시간: {shortest_time} 분")
+
+        # 검색 버튼 추가
+        if st.sidebar.button("검색"):
+            # 부동산 매물 필터링
+            filtered_properties = filter_properties(
+                real_estate_data=real_estate_data,
+                deal_type=deal_type,
+                max_budget=max_budget,
+                max_age=max_age,
+                min_area=min_area,
+                max_area=max_area,
+                deposit=deposit,
+                rent=rent,
+                district=district
+            )
+            # 검색 결과 저장
+            st.session_state['filtered_properties'] = filtered_properties
+
+        # 검색 결과 표시
+        if 'filtered_properties' in st.session_state:
+            filtered_properties = st.session_state['filtered_properties']
+
+            # 지도 생성
+            st.subheader("지하철 및 부동산 위치 지도")
+            st.write(f"현재 법정동: {district} / 부동산 유형: {deal_type}")
+            st_folium(create_map(filtered_properties, subway_location_data, start_station, end_station), width=800, height=600)
+    else:
+        st.write("부동산 데이터 파일을 업로드 해주세요.")
+
 if __name__ == "__main__":
     main()
