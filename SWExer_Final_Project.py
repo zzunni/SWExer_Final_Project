@@ -12,12 +12,12 @@ def load_data():
     # GitHub 파일 URL
     subway_url = "https://raw.githubusercontent.com/zzunni/SWExer_Final_Project/main/subway.csv"
     subway_location_url = "https://raw.githubusercontent.com/zzunni/SWExer_Final_Project/main/subwayLocation.csv"
-    real_estate_url = "https://raw.githubusercontent.com/zzunni/SWExer_Final_Project/main/%EC%84%9C%EC%9A%B8%EC%8B%9C%20%EB%B6%80%EB%8F%99%EC%82%B0%20%EC%A0%84%EC%9B%94%EC%84%B8%EA%B0%80%20%EC%A0%95%EB%B3%B4.csv"
+    real_estate_url = "https://raw.githubusercontent.com/zzunni/SWExer_Final_Project/main/real_estate.csv"
 
     # CSV 파일 읽기
     subway_data = pd.read_csv(subway_url)
     subway_location_data = pd.read_csv(subway_location_url)
-    real_estate_data = pd.read_csv(real_estate_url)
+    real_estate_data = pd.read_csv(real_estate_url, encoding='utf-8')
     
     # 원하는 열만 선택
     selected_columns = [
