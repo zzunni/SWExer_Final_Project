@@ -17,7 +17,7 @@ def load_data():
     # CSV 파일 읽기
     subway_data = pd.read_csv(subway_url)
     subway_location_data = pd.read_csv(subway_location_url)
-    real_estate_data = pd.read_csv(real_estate_url, encoding='utf-8')
+    real_estate_data = pd.read_csv(real_estate_url, encoding='utf-8-sig')
     
     # 원하는 열만 선택
     selected_columns = [
