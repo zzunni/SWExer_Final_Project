@@ -167,7 +167,7 @@ def main():
     uploaded_file = st.sidebar.file_uploader("부동산 데이터 CSV 파일을 업로드하세요", type=["csv"])
 
     if uploaded_file is not None:
-        real_estate_data = pd.read_csv(uploaded_file)
+        real_estate_data = pd.read_csv(uploaded_file, encoding='euc-kr')
 
         # 원하는 열만 선택
         selected_columns = [
